@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>$80 Free Shipping — A/B Test Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F5F0;
+    --surface: #FFFFFF;
+    --border: #E2DDD5;
+    --text-primary: #1A1917;
+    --text-secondary: #6B6760;
+    --text-muted: #9E9B95;
+    --accent: #3B2FC9;
+    --accent-light: #EEEDFE;
+    --accent-text: #3B2FC9;
+    --green: #1D9E75;
+    --green-light: #E1F5EE;
+    --green-text: #0F6E56;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 2.5rem 2rem;
+  }
+
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .brand-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+  }
+
+  .brand-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .test-name {
+    font-size: 26px;
+    font-weight: 300;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+    line-height: 1.2;
+  }
+
+  .test-name strong { font-weight: 500; }
+
+  .start-info {
+    text-align: right;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    line-height: 1.8;
+  }
+
+  /* Big elapsed timer */
+  .timer-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem 2.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .elapsed-time {
+    font-family: var(--mono);
+    font-size: 52px;
+    font-weight: 500;
+    color: var(--text-primary);
+    letter-spacing: -2px;
+    line-height: 1;
+  }
+
+  .elapsed-label {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* Metrics row */
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+
+  .metric {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+  }
+
+  .metric-val {
+    font-family: var(--mono);
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .metric-lbl {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* Split bar */
+  .split-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .section-heading {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+
+  .split-bar {
+    display: flex;
+    height: 40px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .split-variant {
+    width: 10%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #EEEDFE;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: var(--mono);
+  }
+
+  .split-control {
+    flex: 1;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    font-family: var(--mono);
+  }
+
+  .split-legend {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .split-legend span:first-child { color: var(--accent-text); font-weight: 500; }
+
+  /* Milestones */
+  .milestones-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+  }
+
+  .milestone-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+
+  .milestone-row:last-child { border-bottom: none; }
+
+  .ms-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .ms-done { background: var(--green); }
+  .ms-pending { background: var(--border); }
+
+  .ms-week {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    min-width: 64px;
+  }
+
+  .ms-date {
+    flex: 1;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+  }
+
+  .ms-badge {
+    font-size: 11px;
+    background: var(--green-light);
+    color: var(--green-text);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  .ms-upcoming {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .footer {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 560px) {
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .elapsed-time { font-size: 36px; }
+    .header { flex-direction: column; gap: 12px; }
+    .start-info { text-align: left; }
+    body { padding: 1.5rem 1rem; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div>
+      <div class="brand">
+        <div class="brand-dot"></div>
+        <span class="brand-label">Live · Levain Bakery</span>
+      </div>
+      <div class="test-name"><strong>$80 free shipping</strong><br>a/b test tracker</div>
+    </div>
+    <div class="start-info">
+      Started: Apr 14, 2026<br>
+      Timezone: New York (ET)<br>
+      Status: running
+    </div>
+  </div>
+
+  <div class="timer-block">
+    <div class="elapsed-time" id="elapsed-time">0d 00h 00m 00s</div>
+    <div class="elapsed-label">elapsed since test start</div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-val" id="days-val">0</div>
+      <div class="metric-lbl">Days running</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val" id="weeks-val">0</div>
+      <div class="metric-lbl">Weeks complete</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val">10%</div>
+      <div class="metric-lbl">Test traffic</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val">90%</div>
+      <div class="metric-lbl">Control traffic</div>
+    </div>
+  </div>
+
+  <div class="split-section">
+    <div class="section-heading">Traffic split</div>
+    <div class="split-bar">
+      <div class="split-variant">10%</div>
+      <div class="split-control">90% control</div>
+    </div>
+    <div class="split-legend">
+      <span>variant — $80 free shipping threshold</span>
+      <span>control — existing experience</span>
+    </div>
+  </div>
+
+  <div class="milestones-section">
+    <div class="section-heading">Weekly milestones</div>
+    <div id="milestones-list"></div>
+  </div>
+
+  <div class="footer">auto-refreshes every second &nbsp;·&nbsp; levain bakery technology</div>
+
+</div>
+
+<script>
+  const START = Date.UTC(2026, 3, 14, 4, 0, 0); // April 14 2026 00:00 ET = 04:00 UTC
+  const TOTAL_WEEKS = 8;
+
+  function pad(n) { return String(n).padStart(2,'0'); }
+
+  function weekDate(w) {
+    const d = new Date(START + w * 7 * 24 * 3600 * 1000);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function buildMilestones(weeksComplete) {
+    const list = document.getElementById('milestones-list');
+    list.innerHTML = '';
+    for (let w = 1; w <= TOTAL_WEEKS; w++) {
+      const done = w <= weeksComplete;
+      const row = document.createElement('div');
+      row.className = 'milestone-row';
+      row.innerHTML = `
+        <div class="ms-dot ${done ? 'ms-done' : 'ms-pending'}"></div>
+        <div class="ms-week">Week ${w}</div>
+        <div class="ms-date">${weekDate(w)}</div>
+        ${done
+          ? '<span class="ms-badge">complete</span>'
+          : `<span class="ms-upcoming">${w === weeksComplete + 1 ? 'up next' : 'upcoming'}</span>`}
+      `;
+      list.appendChild(row);
+    }
+  }
+
+  function tick() {
+    const now = Date.now();
+    const elapsed = Math.max(0, now - START);
+    const totalSec = Math.floor(elapsed / 1000);
+    const days = Math.floor(totalSec / 86400);
+    const hours = Math.floor((totalSec % 86400) / 3600);
+    const minutes = Math.floor((totalSec % 3600) / 60);
+    const seconds = totalSec % 60;
+    const weeks = Math.floor(days / 7);
+
+    document.getElementById('elapsed-time').textContent =
+      days + 'd ' + pad(hours) + 'h ' + pad(minutes) + 'm ' + pad(seconds) + 's';
+    document.getElementById('days-val').textContent = days;
+    document.getElementById('weeks-val').textContent = weeks;
+    buildMilestones(weeks);
+  }
+
+  tick();
+  setInterval(tick, 1000);
+</script>
+</body>
+</html>
